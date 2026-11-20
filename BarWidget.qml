@@ -130,6 +130,8 @@ BarWidget {
 
   function handlePress(button) {
     if (!root.bar) return
+    // The pressed panel takes the pointer; a tooltip left up would sit over it.
+    if (typeof root.bar.hideTooltip === "function") root.bar.hideTooltip(root)
     if (button === Qt.RightButton) root.toggleSettings()
     else if (button === Qt.MiddleButton) root.refresh()
     else root.togglePanel()
@@ -144,6 +146,12 @@ BarWidget {
 
   // Set by the bar's press overlay while it holds this widget down.
   property int heldButtons: Qt.NoButton
+
+  // Hover read-out: every current value the panel has, without opening it.
+  readonly property string tooltipText: panelLoader.item && panelLoader.item.tooltipText
+    ? panelLoader.item.tooltipText() : ""
+  // The bar only shows a tooltip whose target reports the pointer over it.
+  readonly property bool tooltipHovered: hoverArea.containsMouse && root.visible
 
   visible: root.iconVisible || root.temperatureText !== ""
   implicitWidth: (root.iconVisible ? button.implicitWidth : 0)
@@ -230,5 +238,16 @@ BarWidget {
     onClicked: function(mouse) {
       root.handlePress(mouse.button)
     }
+  }
+
+  // Hover anywhere on the pill — icon or temperature — opens the full
+  // read-out. Passive: left clicks still reach the bar's press overlay.
+  MouseArea {
+    id: hoverArea
+    anchors.fill: parent
+    hoverEnabled: true
+    acceptedButtons: Qt.NoButton
+    onEntered: if (root.bar && typeof root.bar.showTooltip === "function") root.bar.showTooltip(root, root.tooltipText)
+    onExited: if (root.bar && typeof root.bar.hideTooltip === "function") root.bar.hideTooltip(root)
   }
 }

@@ -140,6 +140,9 @@ Panel {
 
   // Popup options, all editable from the right-click settings menu.
   readonly property bool showFeelsLike: setting("showFeelsLike", true) !== false
+  readonly property bool showWind: setting("showWind", true) !== false
+  readonly property bool showHumidity: setting("showHumidity", true) !== false
+  readonly property bool showRain: setting("showRain", true) !== false
   readonly property bool showLocation: setting("showLocation", true) !== false
   readonly property bool showUpdatedAt: setting("showUpdatedAt", true) !== false
   // Future days in the forecast row; 0 hides the row.
@@ -183,11 +186,31 @@ Panel {
   readonly property string reportFeels:     current ? formatTemp(useImperial ? current.FeelsLikeF : current.FeelsLikeC) : ""
   readonly property string reportWind:      current ? (useImperial ? (displayNumber(current.windspeedMiles) + " mph") : (displayNumber(current.windspeedKmph) + " km/h")) : ""
   readonly property string reportHumidity:  current ? (displayNumber(current.humidity) + "%") : ""
+  readonly property string reportRain:      current
+    ? Model.rainChance(current.chanceOfRain !== undefined && current.chanceOfRain !== null
+        ? current.chanceOfRain : current.chanceofrain, Commons.I18n.formatNumber)
+    : ""
 
   // The report's numbers arrive as strings ("13"), and blank when missing.
   function displayNumber(value) {
     if (value === undefined || value === null || value === "") return ""
     return Commons.I18n.formatNumber(value)
+  }
+
+  // Every current reading on one tooltip, for the bar pill's hover. Values the
+  // source does not provide are left out rather than shown blank.
+  function tooltipText() {
+    var lines = []
+    if (reportLocation !== "") lines.push(reportLocation)
+    var head = label || ""
+    if (reportTempNum !== "") head += (head !== "" ? " " : "") + reportTempNum + tempUnit
+    if (head !== "") lines.push(head)
+    if (reportFeels !== "") lines.push(strings.t("tooltip.feels").arg(reportFeels))
+    if (reportWind !== "") lines.push(strings.t("tooltip.wind").arg(reportWind))
+    if (reportHumidity !== "") lines.push(strings.t("tooltip.humidity").arg(reportHumidity))
+    if (reportRain !== "") lines.push(strings.t("tooltip.rain").arg(reportRain))
+    if (updatedAtText !== "") lines.push(updatedAtText)
+    return lines.join("\n")
   }
 
   function refresh() {
@@ -230,7 +253,7 @@ Panel {
       + "?latitude=" + encodeURIComponent(String(lat))
       + "&longitude=" + encodeURIComponent(String(lon))
       + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max"
-      + "&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day"
+      + "&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day,precipitation_probability"
       // The current fields need a window too; one day is today only.
       + "&forecast_days=" + Math.max(1, root.forecastDayCount + 1)
       + "&timezone=auto"
@@ -590,6 +613,11 @@ Panel {
       if (root.hostWidget && typeof root.hostWidget.toggleSettings === "function")
         root.hostWidget.toggleSettings()
     }
+    function openSettings(): void {
+      if (root.hostWidget && typeof root.hostWidget.openSettings === "function")
+        root.hostWidget.openSettings()
+      else root.close()
+    }
   }
 
   KeyboardPanel {
@@ -798,7 +826,8 @@ Panel {
 
           Row {
             id: weatherStats
-            visible: !!root.current
+            visible: !!root.current && (root.showFeelsLike || root.showWind
+              || root.showHumidity || (root.showRain && root.reportRain !== ""))
             spacing: Style.space(36)
 
             Column {
@@ -822,6 +851,7 @@ Panel {
             }
 
             Column {
+              visible: root.showWind
               spacing: Style.space(5)
               Text {
                 text: Commons.I18n.t("weather.wind")
@@ -841,6 +871,7 @@ Panel {
             }
 
             Column {
+              visible: root.showHumidity
               spacing: Style.space(5)
               Text {
                 text: Commons.I18n.t("weather.humid")
@@ -853,6 +884,26 @@ Panel {
               Text {
                 textFormat: Text.PlainText
                 text: root.reportHumidity
+                color: root.bar.foreground
+                font.family: root.bar.fontFamily
+                font.pixelSize: Style.font.title
+              }
+            }
+
+            Column {
+              visible: root.showRain && root.reportRain !== ""
+              spacing: Style.space(5)
+              Text {
+                text: strings.t("panel.rain")
+                textFormat: Text.PlainText
+                color: Qt.darker(root.bar.foreground, 1.5)
+                font.family: root.bar.fontFamily
+                font.pixelSize: Style.font.bodySmall
+                font.letterSpacing: 1
+              }
+              Text {
+                textFormat: Text.PlainText
+                text: root.reportRain
                 color: root.bar.foreground
                 font.family: root.bar.fontFamily
                 font.pixelSize: Style.font.title
@@ -1012,17 +1063,34 @@ Panel {
         }
       }
 
-      // ---- Last update footer, under the forecast row.
-      Text {
-        visible: root.showUpdatedAt && root.updatedAtText !== ""
+      // ---- Footer: last update on the left, settings gear on the right.
+      Item {
         width: parent.width
-        horizontalAlignment: Text.AlignRight
-        textFormat: Text.PlainText
-        text: root.updatedAtText
-        color: Qt.darker(root.bar.foreground, 1.5)
-        font.family: root.bar.fontFamily
-        font.pixelSize: Style.font.caption
-        font.letterSpacing: 0.5
+        height: Math.max(footerText.implicitHeight, gearButton.implicitHeight)
+
+        Text {
+          id: footerText
+          visible: root.showUpdatedAt && root.updatedAtText !== ""
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+          textFormat: Text.PlainText
+          text: root.updatedAtText
+          color: Qt.darker(root.bar.foreground, 1.5)
+          font.family: root.bar.fontFamily
+          font.pixelSize: Style.font.caption
+          font.letterSpacing: 0.5
+        }
+
+        PanelActionButton {
+          id: gearButton
+          anchors.right: parent.right
+          anchors.verticalCenter: parent.verticalCenter
+          iconText: "\uf013"
+          tooltipText: strings.t("panel.settings")
+          foreground: root.bar.foreground
+          fontFamily: root.bar.fontFamily
+          onClicked: root.openSettings()
+        }
       }
     }
   }

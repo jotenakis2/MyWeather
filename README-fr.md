@@ -1,6 +1,6 @@
 # MyWeather
 
-Version 1.2.0
+Version 1.3.0
 
 [English](README.md) | **Français**
 
@@ -16,7 +16,9 @@ Ce qu'il ajoute :
 - des prévisions jusqu'à **sept jours** au lieu de trois, avec un nombre de
   jours réglable de 0 à 7 et la probabilité de pluie sous chaque jour ;
 - un **menu de réglages au clic droit** (français et anglais, selon la langue
-  du bureau) pour choisir ce qu'affichent la barre et le panneau ;
+  du bureau) pour choisir ce qu'affichent la barre et le panneau, et le lieu ;
+- un **bouton roue dentée dans le panneau**, qui ouvre le même menu ;
+- une **infobulle au survol** de la pastille, avec tous les relevés courants ;
 - un `User-Agent` stable sur ses requêtes HTTP — le serveur d'open-meteo répond
   `403` à celui de `curl` par défaut, ce qui laissait la pastille sans icône et
   donc invisible ;
@@ -34,7 +36,7 @@ découvrir.
 
 ![MyWeather dans la barre Omarchy](docs/screenshots/bar.png)
 
-![Le popup avec les prévisions sur cinq jours](docs/screenshots/panel.png)
+![Le panneau avec les conditions, la pluie et la roue dentée des réglages](docs/screenshots/panel.png)
 
 ![Le menu de réglages au clic droit](docs/screenshots/settings.png)
 
@@ -63,13 +65,17 @@ Dans le popup :
 | --- | --- |
 | En-tête | grande icône, température actuelle, unité |
 | Lieu | le lieu configuré, ou celui détecté depuis le réseau |
-| Détails | ressenti, vent, humidité |
+| Détails | ressenti, vent, humidité, probabilité de pluie |
 | Prévisions | 0 à 7 jours : nom du jour, icône, max/min et probabilité de pluie |
-| Pied | heure du dernier relevé |
+| Pied | heure du dernier relevé, et une roue dentée des réglages |
+
+Survoler la pastille affiche une infobulle avec tout à la fois : lieu, icône et
+température, ressenti, vent, humidité, probabilité de pluie et heure du dernier
+relevé.
 
 Un clic sur la ligne du lieu ouvre un champ de recherche (géocodage
-Open-Meteo). Choisir une suggestion enregistre le nom et les coordonnées ; une
-valeur vide revient au lieu détecté automatiquement par `geo.omarchy.org`.
+Open-Meteo) ; le menu de réglages a une section **Lieu** pour choisir une ville
+ou revenir au lieu détecté automatiquement par `geo.omarchy.org` (le défaut).
 
 ## Clics
 
@@ -78,6 +84,7 @@ valeur vide revient au lieu détecté automatiquement par `geo.omarchy.org`.
 | Gauche | ouvrir ou fermer le popup |
 | Droit | ouvrir le menu de réglages |
 | Milieu | rafraîchir maintenant |
+| Roue dentée (dans le panneau) | ouvrir le menu de réglages |
 
 Le menu peut aussi s'ouvrir depuis un raccourci clavier ou un script :
 
@@ -96,6 +103,9 @@ choisies dans l'entrée du widget dans `~/.config/omarchy/shell.json` :
 | `showTemperature` | `true` | température à droite de l'icône dans la barre |
 | `showIcon` | `true` | icône des conditions dans la barre |
 | `showFeelsLike` | `true` | température ressentie dans le panneau |
+| `showWind` | `true` | vent dans le panneau |
+| `showHumidity` | `true` | humidité dans le panneau |
+| `showRain` | `true` | probabilité de pluie dans le panneau |
 | `showLocation` | `true` | nom du lieu dans le panneau |
 | `showUpdatedAt` | `true` | heure de mise à jour en pied de panneau |
 | `forecastDays` | `5` | jours de prévisions, 0 à 7 (0 masque la ligne) |
@@ -115,9 +125,10 @@ omarchy bar set io.github.jotenakis2.myweather forecastDays 2 --json
 ## D'où viennent les données
 
 - `wttr.in` pour les conditions actuelles et les prévisions de secours (son
-  `chanceofrain` remplit la même ligne de pluie) ;
+  `chanceofrain` remplit les mêmes lignes de pluie) ;
 - `api.open-meteo.com` pour la lecture rapide des conditions, les prévisions
-  quotidiennes et la probabilité de pluie (`precipitation_probability_max`) ;
+  quotidiennes, la pluie courante (`current=precipitation_probability`) et
+  celle de chaque jour (`precipitation_probability_max`) ;
 - `geo.omarchy.org` pour détecter le lieu quand aucun n'est configuré ;
 - `geocoding-api.open-meteo.com` pour la recherche de lieu.
 

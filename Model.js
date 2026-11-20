@@ -192,7 +192,8 @@ function openMeteoCurrentCondition(dailyForecastReport) {
     windspeedMiles: roundedTemp(current.wind_speed_10m * 0.621371),
     humidity: roundedTemp(current.relative_humidity_2m),
     openMeteoWeatherCode: current.weather_code,
-    isDay: current.is_day
+    isDay: current.is_day,
+    chanceOfRain: current.precipitation_probability
   }
 }
 
@@ -249,15 +250,18 @@ function wttrNextForecastDays(report, todayString, maxDays) {
   return result
 }
 
-// Rain probability for a forecast day, as a percentage string, or "" when the
-// source has none.
-function rainChanceForDay(day, fmt) {
-  if (!day) return ""
-  var value = day.chanceOfRain
+// A rain probability as a percentage string, or "" when the value is missing.
+function rainChance(value, fmt) {
   if (value === undefined || value === null || value === "") return ""
   var n = parseInt(String(value), 10)
   if (isNaN(n)) return ""
   return displayNumber(fmt)(n) + "%"
+}
+
+// Rain probability for a forecast day, as a percentage string, or "" when the
+// source has none.
+function rainChanceForDay(day, fmt) {
+  return day ? rainChance(day.chanceOfRain, fmt) : ""
 }
 
 function buildForecastDays(report, dailyForecastReport, todayString, maxDays) {
@@ -349,6 +353,7 @@ if (typeof module !== "undefined") {
     forecastDayLimit: forecastDayLimit,
     wttrNextForecastDays: wttrNextForecastDays,
     buildForecastDays: buildForecastDays,
+    rainChance: rainChance,
     rainChanceForDay: rainChanceForDay,
     bareTempForDay: bareTempForDay,
     dayIcon: dayIcon,
