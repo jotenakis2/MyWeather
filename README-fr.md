@@ -1,6 +1,6 @@
 # MyWeather
 
-Version 1.4.1
+Version 1.5.0
 
 [English](README.md) | **Français**
 
@@ -83,9 +83,10 @@ Pluie        30%
 Mis à jour 18:11
 ```
 
-Un clic sur la ligne du lieu ouvre la page de ce lieu sur **wttr.in** dans le
-navigateur. Le menu de réglages a une section **Lieu** pour choisir une autre
-ville (géocodage Open-Meteo) ou revenir au lieu détecté automatiquement par
+Un clic sur la ligne du lieu ouvre la page de ce lieu sur **wttr.in** dans une
+fenêtre de webapp flottante et centrée (réutilisée si elle est déjà ouverte).
+Le menu de réglages a une section **Lieu** pour choisir une autre ville
+(géocodage Open-Meteo) ou revenir au lieu détecté automatiquement par
 `geo.omarchy.org` (le défaut).
 
 ## Clics

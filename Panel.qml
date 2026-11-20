@@ -300,11 +300,22 @@ Panel {
     return panel.loadedContent ? panel.loadedContent.locationField : null
   }
 
-  // The place line opens that place's page on wttr.in, the service the
-  // readings come from. Changing the place lives in the settings menu.
+  // The place line opens that place's page on wttr.in as a floating web app.
+  // The browser stamps the web app's class only after its surface maps, too
+  // late for a Hyprland window rule, so the helper script floats and centers
+  // the window once it appears.
+  readonly property string webappScript: String(Qt.resolvedUrl("weather-webapp.sh")).replace("file://", "")
+
   function openLocationPage() {
     var query = Model.wttrLocationQuery(locationState.name, locationState.latitude, locationState.longitude)
-    Qt.openUrlExternally("https://wttr.in/" + query)
+    locationPageProc.command = ["bash", root.webappScript, "https://wttr.in/" + query]
+    locationPageProc.running = true
+    // The web app takes the screen; leave the popup out of its way.
+    root.close()
+  }
+
+  Process {
+    id: locationPageProc
   }
 
   function startEditingLocation() {
