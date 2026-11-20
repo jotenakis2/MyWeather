@@ -110,7 +110,7 @@ avec le plugin) et s'organise en trois sections :
 
 1. **Lieu** : détection automatique (par défaut) ou ville choisie par recherche ;
 2. **Réglages barre** : température et icône des conditions dans la pastille ;
-3. **Réglage panneau** : les relevés du panneau et le nombre de jours de prévisions.
+3. **Réglages panneau** : les relevés du panneau et le nombre de jours de prévisions.
 
 Les valeurs barre/panneau sont écrites dans l'entrée du widget dans
 `~/.config/omarchy/shell.json` :
