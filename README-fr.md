@@ -1,6 +1,6 @@
 # MyWeather
 
-Version 1.5.0
+Version 1.5.1
 
 [English](README.md) | **Français**
 

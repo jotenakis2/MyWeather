@@ -799,6 +799,15 @@ Panel {
               font.letterSpacing: 1
               anchors.verticalCenter: parent.verticalCenter
             }
+            // Says the place opens its page, without a word of text.
+            Text {
+              text: "\uf08e"  // nf-fa-external_link
+              textFormat: Text.PlainText
+              color: Qt.darker(root.bar.foreground, 1.6)
+              font.family: root.bar.fontFamily
+              font.pixelSize: Style.font.bodySmall
+              anchors.verticalCenter: parent.verticalCenter
+            }
           }
 
           Row {
