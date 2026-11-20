@@ -138,6 +138,26 @@ Panel {
   // Shared hero/bar icon state, updated with each successful weather response.
   property string label: ""
 
+  // Popup options, all editable from the right-click settings menu.
+  readonly property bool showFeelsLike: setting("showFeelsLike", true) !== false
+  readonly property bool showLocation: setting("showLocation", true) !== false
+  readonly property bool showUpdatedAt: setting("showUpdatedAt", true) !== false
+  // Future days in the forecast row; 0 hides the row.
+  readonly property int forecastDayCount: Model.forecastDayLimit(setting("forecastDays", 5))
+
+  // When the readings currently on screen were received.
+  property var lastUpdated: null
+  readonly property string updatedAtText: lastUpdated
+    ? strings.t("panel.updatedAt").arg(lastUpdated.toLocaleTimeString(Qt.locale(Commons.I18n.formatLocale), Locale.ShortFormat))
+    : ""
+
+  Commons.Translations {
+    id: strings
+    directory: Qt.resolvedUrl("i18n")
+  }
+
+  onForecastDayCountChanged: Qt.callLater(refreshDailyForecast, null)
+
   // open-meteo's edge answers 403 to requests whose User-Agent starts with
   // "curl/", which silently left the pill without an icon and so hidden.
   readonly property string httpUserAgent: "omarchy-weather/1.0"
@@ -211,7 +231,8 @@ Panel {
       + "&longitude=" + encodeURIComponent(String(lon))
       + "&daily=weather_code,temperature_2m_max,temperature_2m_min"
       + "&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day"
-      + "&forecast_days=6"
+      // The current fields need a window too; one day is today only.
+      + "&forecast_days=" + Math.max(1, root.forecastDayCount + 1)
       + "&timezone=auto"
     dailyForecastProc.command = ["curl", "-fsS", "-A", root.httpUserAgent, "--max-time", "5", url]
     dailyForecastProc.running = true
@@ -319,15 +340,15 @@ Panel {
   }
 
   function buildForecastDays() {
-    return Model.buildForecastDays(report, dailyForecastReport, Qt.formatDate(new Date(), "yyyy-MM-dd"))
+    return Model.buildForecastDays(report, dailyForecastReport, Qt.formatDate(new Date(), "yyyy-MM-dd"), forecastDayCount)
   }
 
   function openMeteoForecastDays() {
-    return Model.openMeteoForecastDays(dailyForecastReport, Qt.formatDate(new Date(), "yyyy-MM-dd"))
+    return Model.openMeteoForecastDays(dailyForecastReport, Qt.formatDate(new Date(), "yyyy-MM-dd"), forecastDayCount)
   }
 
   function wttrNextForecastDays() {
-    return Model.wttrNextForecastDays(report, Qt.formatDate(new Date(), "yyyy-MM-dd"))
+    return Model.wttrNextForecastDays(report, Qt.formatDate(new Date(), "yyyy-MM-dd"), forecastDayCount)
   }
 
   function isFutureForecastDate(dateString) {
@@ -384,6 +405,7 @@ Panel {
         try {
           var parsed = JSON.parse(raw)
           root.report = parsed
+          root.lastUpdated = new Date()
           // Fill an empty icon from wttr even when a location is configured:
           // if open-meteo is unreachable, this is the only thing that can make
           // the bar pill visible. provisionalCurrentIcon never replaces an
@@ -448,6 +470,7 @@ Panel {
           var parsed = JSON.parse(raw)
           var parsedCurrent = Model.openMeteoCurrentCondition(parsed)
           root.dailyForecastReport = parsed
+          root.lastUpdated = new Date()
           root.label = Model.currentIcon(parsedCurrent, root.label)
           root.dailyForecastRetries = 0
           if (Model.weatherResponseCompletesSave(root.hasConfiguredCoordinates, "open-meteo"))
@@ -534,12 +557,34 @@ Panel {
   ShellIpc {
     target: root.ipcTarget
 
-    function open(): void { root.openFromHotkey() }
-    function close(): void { root.close() }
-    function show(): void { root.openFromHotkey() }
-    function hide(): void { root.close() }
-    function toggle(): void { root.toggle() }
-    function edit(): void { root.openFromHotkey(); root.startEditingLocation() }
+    // Route through the host widget when there is one: it owns the mutual
+    // exclusion between this panel and the settings menu, so an IPC open or
+    // toggle never leaves both up at once.
+    function open(): void {
+      if (root.hostWidget && typeof root.hostWidget.open === "function") root.hostWidget.open()
+      else root.openFromHotkey()
+    }
+    function close(): void {
+      if (root.hostWidget && typeof root.hostWidget.close === "function") root.hostWidget.close()
+      else root.close()
+    }
+    function show(): void { open() }
+    function hide(): void { close() }
+    function toggle(): void {
+      if (root.hostWidget && typeof root.hostWidget.togglePanel === "function") root.hostWidget.togglePanel()
+      else root.toggle()
+    }
+    function edit(): void {
+      if (root.hostWidget && typeof root.hostWidget.open === "function") root.hostWidget.open()
+      else root.openFromHotkey()
+      root.startEditingLocation()
+    }
+    // Opens the right-click settings menu, so a keybinding or script can reach
+    // it without the pointer.
+    function settings(): void {
+      if (root.hostWidget && typeof root.hostWidget.toggleSettings === "function")
+        root.hostWidget.toggleSettings()
+    }
   }
 
   KeyboardPanel {
@@ -645,7 +690,7 @@ Panel {
           spacing: Style.space(12)
 
           Row {
-            visible: !root.editingLocation && root.reportLocation !== ""
+            visible: root.showLocation && !root.editingLocation && root.reportLocation !== ""
             spacing: Style.space(6)
 
             TapHandler {
@@ -746,6 +791,7 @@ Panel {
             spacing: Style.space(36)
 
             Column {
+              visible: root.showFeelsLike
               spacing: Style.space(5)
               Text {
                 text: Commons.I18n.t("weather.feels")
@@ -942,6 +988,19 @@ Panel {
             }
           }
         }
+      }
+
+      // ---- Last update footer, under the forecast row.
+      Text {
+        visible: root.showUpdatedAt && root.updatedAtText !== ""
+        width: parent.width
+        horizontalAlignment: Text.AlignRight
+        textFormat: Text.PlainText
+        text: root.updatedAtText
+        color: Qt.darker(root.bar.foreground, 1.5)
+        font.family: root.bar.fontFamily
+        font.pixelSize: Style.font.caption
+        font.letterSpacing: 0.5
       }
     }
   }

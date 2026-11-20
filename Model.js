@@ -150,13 +150,13 @@ function dayName(dateString, formatter) {
   return ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][d.getDay()]
 }
 
-function openMeteoForecastDays(dailyForecastReport, todayString) {
+function openMeteoForecastDays(dailyForecastReport, todayString, maxDays) {
   var daily = dailyForecastReport && dailyForecastReport.daily ? dailyForecastReport.daily : null
   if (!daily || !daily.time) return []
 
   var result = []
-  // Five future days: the panel shows a five-day forecast.
-  for (var i = 0; i < daily.time.length && result.length < 5; ++i) {
+  var limit = forecastDayLimit(maxDays)
+  for (var i = 0; i < daily.time.length && result.length < limit; ++i) {
     var date = daily.time[i]
     if (!isFutureForecastDate(date, todayString)) continue
 
@@ -213,20 +213,31 @@ function weatherResponseCompletesSave(hasConfiguredCoordinates, source) {
   return hasConfiguredCoordinates ? source === "open-meteo" : source === "wttr"
 }
 
-function wttrNextForecastDays(report, todayString) {
+// How many future days the forecast row shows: the widget's own setting,
+// clamped to what the API window can hold. Missing or unparseable means the
+// stock five.
+function forecastDayLimit(maxDays) {
+  if (maxDays === undefined || maxDays === null || maxDays === "") return 5
+  var n = parseInt(String(maxDays), 10)
+  if (isNaN(n)) return 5
+  return Math.max(0, Math.min(5, n))
+}
+
+function wttrNextForecastDays(report, todayString, maxDays) {
   var days = report && report.weather ? report.weather : []
   var result = []
   // wttr.in's j1 payload only carries three days, so this is the most the
   // fallback can ever show; the five-day request needs Open-Meteo.
-  for (var i = 0; i < days.length && result.length < 5; ++i) {
+  var limit = forecastDayLimit(maxDays)
+  for (var i = 0; i < days.length && result.length < limit; ++i) {
     if (isFutureForecastDate(days[i].date, todayString)) result.push(days[i])
   }
   return result
 }
 
-function buildForecastDays(report, dailyForecastReport, todayString) {
-  var days = openMeteoForecastDays(dailyForecastReport, todayString)
-  return days.length > 0 ? days : wttrNextForecastDays(report, todayString)
+function buildForecastDays(report, dailyForecastReport, todayString, maxDays) {
+  var days = openMeteoForecastDays(dailyForecastReport, todayString, maxDays)
+  return days.length > 0 ? days : wttrNextForecastDays(report, todayString, maxDays)
 }
 
 function bareTempForDay(day, kind, useImperial, fmt) {
@@ -310,6 +321,7 @@ if (typeof module !== "undefined") {
     currentIcon: currentIcon,
     provisionalCurrentIcon: provisionalCurrentIcon,
     weatherResponseCompletesSave: weatherResponseCompletesSave,
+    forecastDayLimit: forecastDayLimit,
     wttrNextForecastDays: wttrNextForecastDays,
     buildForecastDays: buildForecastDays,
     bareTempForDay: bareTempForDay,

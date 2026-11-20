@@ -1,0 +1,21 @@
+{
+  "settings.title": "Weather settings",
+  "settings.showTemperature": "Show temperature",
+  "settings.showTemperatureHint": "Current temperature next to the condition icon in the bar.",
+  "settings.showFeelsLike": "Show feels-like",
+  "settings.showFeelsLikeHint": "Feels-like temperature in the popup.",
+  "settings.showIcon": "Show icon",
+  "settings.showIconHint": "Condition icon in the bar.",
+  "settings.showLocation": "Show location",
+  "settings.showLocationHint": "Place name in the popup. Click it there to change the place.",
+  "settings.showUpdatedAt": "Show last update",
+  "settings.showUpdatedAtHint": "Time the popup's readings were fetched.",
+  "settings.forecastDays": "Forecast days",
+  "settings.forecastDayCount": {
+    "one": "%1 day",
+    "other": "%1 days"
+  },
+  "settings.forecastNone": "None",
+  "settings.keepOne": "The bar pill always keeps the icon or the temperature.",
+  "panel.updatedAt": "Updated %1"
+}
