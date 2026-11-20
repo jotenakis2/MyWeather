@@ -1,6 +1,6 @@
 # MyWeather
 
-Version 1.4.0
+Version 1.4.1
 
 **English** | [Français](README-fr.md)
 
@@ -81,9 +81,10 @@ Pluie        30%
 Mis à jour 18:11
 ```
 
-Clicking the location line opens a search field (Open-Meteo geocoding), and the
-settings menu has a **Location** section to pick a city or go back to the
-automatic location detected by `geo.omarchy.org` (the default).
+Clicking the location line opens that place's page on **wttr.in** in your
+browser. The settings menu has a **Location** section to pick another city
+(Open-Meteo geocoding) or go back to the automatic location detected by
+`geo.omarchy.org` (the default).
 
 ## Clicks
 

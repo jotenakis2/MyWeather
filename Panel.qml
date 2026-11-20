@@ -300,6 +300,13 @@ Panel {
     return panel.loadedContent ? panel.loadedContent.locationField : null
   }
 
+  // The place line opens that place's page on wttr.in, the service the
+  // readings come from. Changing the place lives in the settings menu.
+  function openLocationPage() {
+    var query = Model.wttrLocationQuery(locationState.name, locationState.latitude, locationState.longitude)
+    Qt.openUrlExternally("https://wttr.in/" + query)
+  }
+
   function startEditingLocation() {
     editingLocation = true
     savingLocation = false
@@ -759,7 +766,7 @@ Panel {
             spacing: Style.space(6)
 
             TapHandler {
-              onTapped: root.startEditingLocation()
+              onTapped: root.openLocationPage()
             }
             HoverHandler {
               cursorShape: Qt.PointingHandCursor
