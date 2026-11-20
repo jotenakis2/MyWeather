@@ -52,6 +52,8 @@ Panel {
   property var suggestions: []
   property int suggestionIndex: 0
   property string pendingQuery: ""
+  // Text of the search field, owned here so picking a city can clear it.
+  property string locationQuery: ""
 
   FileView {
     id: locationFile
@@ -67,6 +69,7 @@ Panel {
 
   function useAutoLocation() {
     root.suggestions = []
+    root.locationQuery = ""
     locationSaveProc.command = ["omarchy-weather-location", "--clear"]
     locationSaveProc.running = true
   }
@@ -74,6 +77,7 @@ Panel {
   function chooseSuggestion(suggestion) {
     if (!suggestion) return
     root.suggestions = []
+    root.locationQuery = ""
     locationSaveProc.command = ["omarchy-weather-location", "--set", String(suggestion.name),
       String(suggestion.latitude) + "," + String(suggestion.longitude)]
     locationSaveProc.running = true
@@ -291,7 +295,11 @@ Panel {
           placeholderText: strings.t("settings.locationSearch")
           foreground: root.foreground
           font.family: root.fontFamily
-          onTextChanged: root.requestGeocode(text)
+          text: root.locationQuery
+          onTextChanged: {
+            if (root.locationQuery !== text) root.locationQuery = text
+            root.requestGeocode(text)
+          }
           onAccepted: root.chooseSuggestion(root.suggestions[Math.max(0, Math.min(root.suggestionIndex, root.suggestions.length - 1))])
         }
 
