@@ -55,6 +55,23 @@ omarchy bar move io.github.jotenakis2.myweather --section left
 
 Sections possibles : `left`, `centerBegin`, `center`, `centerEnd`, `right`.
 
+Pour le désinstaller :
+
+```bash
+omarchy plugin remove io.github.jotenakis2.myweather
+```
+
+## Prérequis
+
+- Omarchy et son shell Quickshell, sous Hyprland
+- `curl` et `jq` dans le `PATH`
+- un navigateur Chromium (Brave, Chromium, …) pour la webapp ouverte au clic
+  sur le lieu
+
+Le widget n'écrit que sa propre entrée dans `~/.config/omarchy/shell.json`. Il
+ne modifie le lieu partagé que lorsque vous choisissez un lieu ou revenez à la
+détection automatique, via `omarchy-weather-location`.
+
 ## Ce qu'il affiche
 
 Dans la barre : l'icône des conditions, suivie de la température actuelle.

@@ -53,6 +53,23 @@ omarchy bar move io.github.jotenakis2.myweather --section left
 
 Use `left`, `centerBegin`, `center`, `centerEnd` or `right`.
 
+To remove it:
+
+```bash
+omarchy plugin remove io.github.jotenakis2.myweather
+```
+
+## Requirements
+
+- Omarchy with its Quickshell shell, on Hyprland
+- `curl` and `jq` on `PATH`
+- a Chromium-based browser (Brave, Chromium, …) for the web app the place
+  click opens
+
+The widget writes only its own entry in `~/.config/omarchy/shell.json`. It
+changes the shared weather location only when you pick a place or restore the
+automatic one, through `omarchy-weather-location`.
+
 ## What it shows
 
 In the bar: the condition icon followed by the current temperature.
