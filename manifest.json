@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.jotenakis2.myweather",
+  "name": "MyWeather",
+  "version": "1.0.0",
+  "author": "Jotenakis",
+  "license": "MIT",
+  "homepage": "https://github.com/jotenakis2/MyWeather",
+  "description": "MyWeather — an Omarchy bar widget forked from the built-in weather pill: condition icon and current temperature in the bar, a five-day forecast, a location picker and °C/°F.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "MyWeather",
+    "description": "Weather pill with the current temperature and a five-day forecast",
+    "category": "Info",
+    "allowMultiple": false,
+    "settingsForm": "weatherSettings"
+  },
+  "omarchy": {
+    "clonedFrom": "omarchy.weather"
+  }
+}
