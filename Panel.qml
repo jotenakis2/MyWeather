@@ -229,7 +229,7 @@ Panel {
     var url = "https://api.open-meteo.com/v1/forecast"
       + "?latitude=" + encodeURIComponent(String(lat))
       + "&longitude=" + encodeURIComponent(String(lon))
-      + "&daily=weather_code,temperature_2m_max,temperature_2m_min"
+      + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max"
       + "&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day"
       // The current fields need a window too; one day is today only.
       + "&forecast_days=" + Math.max(1, root.forecastDayCount + 1)
@@ -375,6 +375,11 @@ Panel {
   // Bare degree value (no unit letter), used in the forecast row.
   function bareTempForDay(day, kind) {
     return Model.bareTempForDay(day, kind, useImperial, Commons.I18n.formatNumber)
+  }
+
+  // Rain probability for a forecast day ("60%"), or "" when the source has none.
+  function rainChanceForDay(day) {
+    return Model.rainChanceForDay(day, Commons.I18n.formatNumber)
   }
 
   // Representative icon for a forecast day: the hourly entry nearest noon.
@@ -599,7 +604,9 @@ Panel {
     focusTarget: panel.loadedContent
     // Drop the popup 5px lower than the stock gap under the bar.
     gap: Style.gapsOut + 5
-    contentWidth: panel.fittedContentWidth(Style.space(560))
+    // Seven days need a wider card than five, so the forecast row keeps its
+    // side margins instead of being clipped.
+    contentWidth: panel.fittedContentWidth(Style.space(560 + 140 * Math.max(0, root.forecastDayCount - 5)))
     contentHeight: panel.fittedContentHeight(panel.loadedContentHeight)
 
     content: PanelKeyCatcher {
@@ -683,13 +690,16 @@ Panel {
 
         Column {
           id: heroRight
-          width: weatherStats.implicitWidth
+          // Wide enough for the widest child: hiding the feels-like column used
+          // to narrow this to the stats row and clip the place name on the right.
+          width: Math.max(weatherStats.implicitWidth, locationRow.implicitWidth, locationEditRow.implicitWidth)
           anchors.right: parent.right
           anchors.rightMargin: Style.space(20)
           anchors.verticalCenter: parent.verticalCenter
           spacing: Style.space(12)
 
           Row {
+            id: locationRow
             visible: root.showLocation && !root.editingLocation && root.reportLocation !== ""
             spacing: Style.space(6)
 
@@ -719,6 +729,7 @@ Panel {
           }
 
           Row {
+            id: locationEditRow
             visible: root.editingLocation
             spacing: Style.space(6)
 
@@ -983,6 +994,17 @@ Panel {
                     font.family: root.bar.fontFamily
                     font.pixelSize: Style.font.body
                   }
+                }
+
+                // Rain probability, when the forecast source provides it.
+                Text {
+                  textFormat: Text.PlainText
+                  visible: text !== ""
+                  text: root.rainChanceForDay(modelData) !== ""
+                    ? "\ue34a " + root.rainChanceForDay(modelData) : ""
+                  color: Qt.darker(root.bar.foreground, 1.35)
+                  font.family: root.bar.fontFamily
+                  font.pixelSize: Style.font.caption
                 }
               }
             }

@@ -1,6 +1,6 @@
 # MyWeather
 
-Version 1.1.0
+Version 1.2.0
 
 **English** | [Français](README-fr.md)
 
@@ -13,7 +13,8 @@ What it adds on top:
 
 - the current temperature next to the condition icon in the bar
   (switch it off with `showTemperature`);
-- a **five-day** forecast instead of three, and a day count from 0 to 5;
+- a forecast of up to **seven days** instead of three, with a day count from
+  0 to 7 and the rain probability under each day;
 - a **right-click settings menu** (English and French, following the desktop
   language) for what the bar and the popup show;
 - a stable `User-Agent` on its HTTP requests — open-meteo's edge answers
@@ -61,7 +62,7 @@ In the popup:
 | Hero | big condition icon, current temperature, unit |
 | Location | the configured place, or the one detected from your network |
 | Stats | feels-like, wind, humidity |
-| Forecast | 0 to 5 days: day name, condition icon, high and low |
+| Forecast | 0 to 7 days: day name, condition icon, high/low and rain probability |
 | Footer | when the readings were last fetched |
 
 Clicking the location line opens a search field (Open-Meteo geocoding). Picking
@@ -96,7 +97,7 @@ chosen values straight into this widget's entry in
 | `showFeelsLike` | `true` | feels-like value in the popup |
 | `showLocation` | `true` | place name in the popup |
 | `showUpdatedAt` | `true` | last-update footer in the popup |
-| `forecastDays` | `5` | days in the forecast row, 0 to 5 (0 hides it) |
+| `forecastDays` | `5` | days in the forecast row, 0 to 7 (0 hides it) |
 | `unit` | `""` | `""` automatic (country, then locale), or `metric` / `imperial` |
 | `refreshMinutes` | `15` | refresh interval in minutes (minimum 1) |
 
@@ -112,8 +113,10 @@ omarchy bar set io.github.jotenakis2.myweather forecastDays 2 --json
 
 ## Where the data comes from
 
-- `wttr.in` for the current conditions and the popup's fallback forecast;
-- `api.open-meteo.com` for the fast current reading and the daily forecast;
+- `wttr.in` for the current conditions and the popup's fallback forecast
+  (its `chanceofrain` fills the same rain line);
+- `api.open-meteo.com` for the fast current reading, the daily forecast and the
+  rain probability (`precipitation_probability_max`);
 - `geo.omarchy.org` to detect the location when none is configured;
 - `geocoding-api.open-meteo.com` for the location search.
 

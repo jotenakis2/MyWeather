@@ -1,6 +1,6 @@
 # MyWeather
 
-Version 1.1.0
+Version 1.2.0
 
 [English](README.md) | **Français**
 
@@ -13,8 +13,8 @@ Ce qu'il ajoute :
 
 - la température actuelle à droite de l'icône dans la barre (désactivable avec
   `showTemperature`) ;
-- des prévisions sur **cinq jours** au lieu de trois, et un nombre de jours
-  réglable de 0 à 5 ;
+- des prévisions jusqu'à **sept jours** au lieu de trois, avec un nombre de
+  jours réglable de 0 à 7 et la probabilité de pluie sous chaque jour ;
 - un **menu de réglages au clic droit** (français et anglais, selon la langue
   du bureau) pour choisir ce qu'affichent la barre et le panneau ;
 - un `User-Agent` stable sur ses requêtes HTTP — le serveur d'open-meteo répond
@@ -64,7 +64,7 @@ Dans le popup :
 | En-tête | grande icône, température actuelle, unité |
 | Lieu | le lieu configuré, ou celui détecté depuis le réseau |
 | Détails | ressenti, vent, humidité |
-| Prévisions | 0 à 5 jours : nom du jour, icône, maximum et minimum |
+| Prévisions | 0 à 7 jours : nom du jour, icône, max/min et probabilité de pluie |
 | Pied | heure du dernier relevé |
 
 Un clic sur la ligne du lieu ouvre un champ de recherche (géocodage
@@ -98,7 +98,7 @@ choisies dans l'entrée du widget dans `~/.config/omarchy/shell.json` :
 | `showFeelsLike` | `true` | température ressentie dans le panneau |
 | `showLocation` | `true` | nom du lieu dans le panneau |
 | `showUpdatedAt` | `true` | heure de mise à jour en pied de panneau |
-| `forecastDays` | `5` | jours de prévisions, 0 à 5 (0 masque la ligne) |
+| `forecastDays` | `5` | jours de prévisions, 0 à 7 (0 masque la ligne) |
 | `unit` | `""` | `""` automatique (pays, puis locale), ou `metric` / `imperial` |
 | `refreshMinutes` | `15` | intervalle de rafraîchissement en minutes (minimum 1) |
 
@@ -114,9 +114,10 @@ omarchy bar set io.github.jotenakis2.myweather forecastDays 2 --json
 
 ## D'où viennent les données
 
-- `wttr.in` pour les conditions actuelles et les prévisions de secours ;
-- `api.open-meteo.com` pour la lecture rapide des conditions et les prévisions
-  quotidiennes ;
+- `wttr.in` pour les conditions actuelles et les prévisions de secours (son
+  `chanceofrain` remplit la même ligne de pluie) ;
+- `api.open-meteo.com` pour la lecture rapide des conditions, les prévisions
+  quotidiennes et la probabilité de pluie (`precipitation_probability_max`) ;
 - `geo.omarchy.org` pour détecter le lieu quand aucun n'est configuré ;
 - `geocoding-api.open-meteo.com` pour la recherche de lieu.
 

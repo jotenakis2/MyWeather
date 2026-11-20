@@ -168,7 +168,9 @@ function openMeteoForecastDays(dailyForecastReport, todayString, maxDays) {
       mintempC: roundedTemp(minC),
       maxtempF: roundedTemp(celsiusToFahrenheit(maxC)),
       mintempF: roundedTemp(celsiusToFahrenheit(minC)),
-      openMeteoWeatherCode: daily.weather_code ? daily.weather_code[i] : null
+      openMeteoWeatherCode: daily.weather_code ? daily.weather_code[i] : null,
+      chanceOfRain: daily.precipitation_probability_max
+        ? daily.precipitation_probability_max[i] : null
     })
   }
   return result
@@ -220,7 +222,7 @@ function forecastDayLimit(maxDays) {
   if (maxDays === undefined || maxDays === null || maxDays === "") return 5
   var n = parseInt(String(maxDays), 10)
   if (isNaN(n)) return 5
-  return Math.max(0, Math.min(5, n))
+  return Math.max(0, Math.min(7, n))
 }
 
 function wttrNextForecastDays(report, todayString, maxDays) {
@@ -230,9 +232,32 @@ function wttrNextForecastDays(report, todayString, maxDays) {
   // fallback can ever show; the five-day request needs Open-Meteo.
   var limit = forecastDayLimit(maxDays)
   for (var i = 0; i < days.length && result.length < limit; ++i) {
-    if (isFutureForecastDate(days[i].date, todayString)) result.push(days[i])
+    var day = days[i]
+    if (!isFutureForecastDate(day.date, todayString)) continue
+    // Copy the fields the forecast row reads, so both sources expose the same
+    // shape and wttr's own chanceofrain lands under the same key.
+    result.push({
+      date: day.date,
+      maxtempC: day.maxtempC,
+      mintempC: day.mintempC,
+      maxtempF: day.maxtempF,
+      mintempF: day.mintempF,
+      hourly: day.hourly,
+      chanceOfRain: day.chanceofrain
+    })
   }
   return result
+}
+
+// Rain probability for a forecast day, as a percentage string, or "" when the
+// source has none.
+function rainChanceForDay(day, fmt) {
+  if (!day) return ""
+  var value = day.chanceOfRain
+  if (value === undefined || value === null || value === "") return ""
+  var n = parseInt(String(value), 10)
+  if (isNaN(n)) return ""
+  return displayNumber(fmt)(n) + "%"
 }
 
 function buildForecastDays(report, dailyForecastReport, todayString, maxDays) {
@@ -324,6 +349,7 @@ if (typeof module !== "undefined") {
     forecastDayLimit: forecastDayLimit,
     wttrNextForecastDays: wttrNextForecastDays,
     buildForecastDays: buildForecastDays,
+    rainChanceForDay: rainChanceForDay,
     bareTempForDay: bareTempForDay,
     dayIcon: dayIcon,
     iconForOpenMeteoCode: iconForOpenMeteoCode,

@@ -32,7 +32,7 @@ Panel {
 
   function dayOptions() {
     var out = [{ value: "0", label: strings.t("settings.forecastNone") }]
-    for (var n = 1; n <= 5; ++n)
+    for (var n = 1; n <= 7; ++n)
       out.push({ value: String(n), label: strings.tn("settings.forecastDayCount", n).arg(n) })
     return out
   }
