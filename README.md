@@ -1,6 +1,6 @@
 # MyWeather
 
-Version 1.3.0
+Version 1.4.0
 
 **English** | [Français](README-fr.md)
 
@@ -67,9 +67,19 @@ In the popup:
 | Forecast | 0 to 7 days: day name, condition icon, high/low and rain probability |
 | Footer | when the readings were last fetched, and a settings gear |
 
-Hovering the bar pill shows a tooltip with all of them at once: place, condition
-icon and temperature, feels-like, wind, humidity, rain probability and the last
-update time.
+Hovering the bar pill shows a tooltip with all of them at once, as an aligned
+table (the bar font is monospace and every line is padded to the same width, so
+the centered tooltip keeps the column straight):
+
+```
+Colleville-Montgomery
+Temp.       10°C
+Ressenti     9°C
+Vent      5 km/h
+Humidité     90%
+Pluie        30%
+Mis à jour 18:11
+```
 
 Clicking the location line opens a search field (Open-Meteo geocoding), and the
 settings menu has a **Location** section to pick a city or go back to the
@@ -92,9 +102,15 @@ omarchy-shell omarchy.weather settings
 
 ## Settings
 
-Right-clicking the pill opens the settings menu. It follows the desktop
-language (English and French catalogs ship with the plugin) and writes the
-chosen values straight into this widget's entry in
+Right-clicking the pill (or the gear in the popup) opens the settings menu. It
+follows the desktop language (English and French catalogs ship with the plugin)
+and is laid out in three sections:
+
+1. **Location**: automatic detection (default), or a city from the search;
+2. **Bar settings**: temperature and condition icon in the pill;
+3. **Panel settings**: the popup's readings and the forecast day count.
+
+Bar and panel values are written straight into this widget's entry in
 `~/.config/omarchy/shell.json`:
 
 | Key | Default | Meaning |
@@ -107,7 +123,7 @@ chosen values straight into this widget's entry in
 | `showRain` | `true` | rain probability in the popup |
 | `showLocation` | `true` | place name in the popup |
 | `showUpdatedAt` | `true` | last-update footer in the popup |
-| `forecastDays` | `5` | days in the forecast row, 0 to 7 (0 hides it) |
+| `forecastDays` | `5` | days in the forecast row, 0 to 7 (0 hides it); panel setting |
 | `unit` | `""` | `""` automatic (country, then locale), or `metric` / `imperial` |
 | `refreshMinutes` | `15` | refresh interval in minutes (minimum 1) |
 

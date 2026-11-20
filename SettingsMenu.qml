@@ -6,11 +6,11 @@ import qs.Commons as Commons
 import qs.Ui
 import "Model.js" as Model
 
-// Right-click menu for the weather pill: what the bar and the popup show, how
-// many forecast days the popup carries, and which place it reports for. Widget
-// options live in the widget's shell.json layout entry and are written back by
-// the host widget; the place is the shared weather.json state file, written
-// through omarchy-weather-location.
+// Right-click menu for the weather pill. Sections run from the place it
+// reports for, to what the bar pill shows, to what the popup shows. Bar and
+// panel options live in the widget's shell.json layout entry and are written
+// back by the host widget; the place is the shared weather.json state file,
+// written through omarchy-weather-location.
 Panel {
   id: root
   moduleName: "io.github.jotenakis2.myweather"
@@ -146,120 +146,7 @@ Panel {
         width: parent.width
         spacing: Style.space(8)
 
-        PanelSectionHeader {
-          text: strings.t("settings.title")
-          foreground: root.foreground
-          fontFamily: root.fontFamily
-        }
-
-        Toggle {
-          width: parent.width
-          label: strings.t("settings.showTemperature")
-          description: strings.t("settings.showTemperatureHint")
-          checked: root.option("showTemperature", true) !== false
-          foreground: root.foreground
-          fontFamily: root.fontFamily
-          onClicked: root.setOption("showTemperature", !(root.option("showTemperature", true) !== false))
-        }
-
-        Toggle {
-          width: parent.width
-          label: strings.t("settings.showIcon")
-          description: strings.t("settings.showIconHint")
-          checked: root.option("showIcon", true) !== false
-          foreground: root.foreground
-          fontFamily: root.fontFamily
-          onClicked: root.setOption("showIcon", !(root.option("showIcon", true) !== false))
-        }
-
-        PanelSeparator {
-          foreground: root.foreground
-        }
-
-        PanelSectionHeader {
-          text: strings.t("settings.currentReadings")
-          foreground: root.foreground
-          fontFamily: root.fontFamily
-        }
-
-        Toggle {
-          width: parent.width
-          label: strings.t("settings.showFeelsLike")
-          description: strings.t("settings.showFeelsLikeHint")
-          checked: root.option("showFeelsLike", true) !== false
-          foreground: root.foreground
-          fontFamily: root.fontFamily
-          onClicked: root.setOption("showFeelsLike", !(root.option("showFeelsLike", true) !== false))
-        }
-
-        Toggle {
-          width: parent.width
-          label: strings.t("settings.showWind")
-          description: strings.t("settings.showWindHint")
-          checked: root.option("showWind", true) !== false
-          foreground: root.foreground
-          fontFamily: root.fontFamily
-          onClicked: root.setOption("showWind", !(root.option("showWind", true) !== false))
-        }
-
-        Toggle {
-          width: parent.width
-          label: strings.t("settings.showHumidity")
-          description: strings.t("settings.showHumidityHint")
-          checked: root.option("showHumidity", true) !== false
-          foreground: root.foreground
-          fontFamily: root.fontFamily
-          onClicked: root.setOption("showHumidity", !(root.option("showHumidity", true) !== false))
-        }
-
-        Toggle {
-          width: parent.width
-          label: strings.t("settings.showRain")
-          description: strings.t("settings.showRainHint")
-          checked: root.option("showRain", true) !== false
-          foreground: root.foreground
-          fontFamily: root.fontFamily
-          onClicked: root.setOption("showRain", !(root.option("showRain", true) !== false))
-        }
-
-        Toggle {
-          width: parent.width
-          label: strings.t("settings.showLocation")
-          description: strings.t("settings.showLocationHint")
-          checked: root.option("showLocation", true) !== false
-          foreground: root.foreground
-          fontFamily: root.fontFamily
-          onClicked: root.setOption("showLocation", !(root.option("showLocation", true) !== false))
-        }
-
-        Toggle {
-          width: parent.width
-          label: strings.t("settings.showUpdatedAt")
-          description: strings.t("settings.showUpdatedAtHint")
-          checked: root.option("showUpdatedAt", true) !== false
-          foreground: root.foreground
-          fontFamily: root.fontFamily
-          onClicked: root.setOption("showUpdatedAt", !(root.option("showUpdatedAt", true) !== false))
-        }
-
-        PanelSeparator {
-          foreground: root.foreground
-        }
-
-        Dropdown {
-          width: parent.width
-          label: strings.t("settings.forecastDays")
-          value: String(root.option("forecastDays", 5))
-          options: root.dayOptions()
-          foreground: root.foreground
-          fontFamily: root.fontFamily
-          onChanged: function(value) { root.setOption("forecastDays", parseInt(value, 10)) }
-        }
-
-        PanelSeparator {
-          foreground: root.foreground
-        }
-
+        // ---- place -------------------------------------------------------
         PanelSectionHeader {
           text: strings.t("settings.location")
           foreground: root.foreground
@@ -357,14 +244,116 @@ Panel {
           }
         }
 
-        Text {
+        PanelSeparator {
+          foreground: root.foreground
+        }
+
+        // ---- bar pill ----------------------------------------------------
+        PanelSectionHeader {
+          text: strings.t("settings.barSection")
+          foreground: root.foreground
+          fontFamily: root.fontFamily
+        }
+
+        Toggle {
           width: parent.width
-          textFormat: Text.PlainText
-          wrapMode: Text.WordWrap
-          text: strings.t("settings.keepOne")
-          color: Qt.darker(root.foreground, 1.5)
-          font.family: root.fontFamily
-          font.pixelSize: Style.font.caption
+          label: strings.t("settings.showTemperature")
+          description: strings.t("settings.showTemperatureHint")
+          checked: root.option("showTemperature", true) !== false
+          foreground: root.foreground
+          fontFamily: root.fontFamily
+          onClicked: root.setOption("showTemperature", !(root.option("showTemperature", true) !== false))
+        }
+
+        Toggle {
+          width: parent.width
+          label: strings.t("settings.showIcon")
+          description: strings.t("settings.showIconHint")
+          checked: root.option("showIcon", true) !== false
+          foreground: root.foreground
+          fontFamily: root.fontFamily
+          onClicked: root.setOption("showIcon", !(root.option("showIcon", true) !== false))
+        }
+
+        PanelSeparator {
+          foreground: root.foreground
+        }
+
+        // ---- popup -------------------------------------------------------
+        PanelSectionHeader {
+          text: strings.t("settings.panelSection")
+          foreground: root.foreground
+          fontFamily: root.fontFamily
+        }
+
+        Toggle {
+          width: parent.width
+          label: strings.t("settings.showFeelsLike")
+          description: strings.t("settings.showFeelsLikeHint")
+          checked: root.option("showFeelsLike", true) !== false
+          foreground: root.foreground
+          fontFamily: root.fontFamily
+          onClicked: root.setOption("showFeelsLike", !(root.option("showFeelsLike", true) !== false))
+        }
+
+        Toggle {
+          width: parent.width
+          label: strings.t("settings.showWind")
+          description: strings.t("settings.showWindHint")
+          checked: root.option("showWind", true) !== false
+          foreground: root.foreground
+          fontFamily: root.fontFamily
+          onClicked: root.setOption("showWind", !(root.option("showWind", true) !== false))
+        }
+
+        Toggle {
+          width: parent.width
+          label: strings.t("settings.showHumidity")
+          description: strings.t("settings.showHumidityHint")
+          checked: root.option("showHumidity", true) !== false
+          foreground: root.foreground
+          fontFamily: root.fontFamily
+          onClicked: root.setOption("showHumidity", !(root.option("showHumidity", true) !== false))
+        }
+
+        Toggle {
+          width: parent.width
+          label: strings.t("settings.showRain")
+          description: strings.t("settings.showRainHint")
+          checked: root.option("showRain", true) !== false
+          foreground: root.foreground
+          fontFamily: root.fontFamily
+          onClicked: root.setOption("showRain", !(root.option("showRain", true) !== false))
+        }
+
+        Toggle {
+          width: parent.width
+          label: strings.t("settings.showLocation")
+          description: strings.t("settings.showLocationHint")
+          checked: root.option("showLocation", true) !== false
+          foreground: root.foreground
+          fontFamily: root.fontFamily
+          onClicked: root.setOption("showLocation", !(root.option("showLocation", true) !== false))
+        }
+
+        Toggle {
+          width: parent.width
+          label: strings.t("settings.showUpdatedAt")
+          description: strings.t("settings.showUpdatedAtHint")
+          checked: root.option("showUpdatedAt", true) !== false
+          foreground: root.foreground
+          fontFamily: root.fontFamily
+          onClicked: root.setOption("showUpdatedAt", !(root.option("showUpdatedAt", true) !== false))
+        }
+
+        Dropdown {
+          width: parent.width
+          label: strings.t("settings.forecastDays")
+          value: String(root.option("forecastDays", 5))
+          options: root.dayOptions()
+          foreground: root.foreground
+          fontFamily: root.fontFamily
+          onChanged: function(value) { root.setOption("forecastDays", parseInt(value, 10)) }
         }
       }
     }

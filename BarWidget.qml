@@ -61,11 +61,22 @@ BarWidget {
   // ---- settings menu (right click) --------------------------------------
 
   readonly property bool settingsOpen: settingsLoader.item ? settingsLoader.item.opened === true : false
+  // A click that arrives before the lazily built menu exists asks for it to
+  // open as soon as it is loaded; without this the first click was a no-op.
+  property bool settingsPending: false
 
   function openSettings() {
-    if (!settingsLoader.active) settingsLoader.active = true
+    if (!settingsLoader.active) {
+      settingsPending = true
+      settingsLoader.active = true
+      return
+    }
     var menu = settingsLoader.item
-    if (!menu) return
+    if (!menu) {
+      settingsPending = true
+      return
+    }
+    settingsPending = false
     if (panelLoader.item && panelLoader.item.opened) panelLoader.item.close()
     menu.open()
   }
@@ -187,6 +198,7 @@ BarWidget {
     onLoaded: {
       root.injectSettings()
       Qt.callLater(root.injectSettings)
+      if (root.settingsPending) Qt.callLater(root.openSettings)
     }
   }
 

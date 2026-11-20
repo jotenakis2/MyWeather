@@ -1,6 +1,6 @@
 # MyWeather
 
-Version 1.3.0
+Version 1.4.0
 
 [English](README.md) | **Français**
 
@@ -69,9 +69,19 @@ Dans le popup :
 | Prévisions | 0 à 7 jours : nom du jour, icône, max/min et probabilité de pluie |
 | Pied | heure du dernier relevé, et une roue dentée des réglages |
 
-Survoler la pastille affiche une infobulle avec tout à la fois : lieu, icône et
-température, ressenti, vent, humidité, probabilité de pluie et heure du dernier
-relevé.
+Survoler la pastille affiche une infobulle avec tout à la fois, sous forme de
+tableau aligné (la police de la barre est monospace et chaque ligne est
+complétée à la même largeur, l'infobulle centrée garde donc la colonne droite) :
+
+```
+Colleville-Montgomery
+Temp.       10°C
+Ressenti     9°C
+Vent      5 km/h
+Humidité     90%
+Pluie        30%
+Mis à jour 18:11
+```
 
 Un clic sur la ligne du lieu ouvre un champ de recherche (géocodage
 Open-Meteo) ; le menu de réglages a une section **Lieu** pour choisir une ville
@@ -94,9 +104,16 @@ omarchy-shell omarchy.weather settings
 
 ## Réglages
 
-Un clic droit sur la pastille ouvre le menu. Il suit la langue du bureau (les
-catalogues français et anglais sont livrés avec le plugin) et écrit les valeurs
-choisies dans l'entrée du widget dans `~/.config/omarchy/shell.json` :
+Un clic droit sur la pastille (ou sur la roue dentée du panneau) ouvre le menu.
+Il suit la langue du bureau (les catalogues français et anglais sont livrés
+avec le plugin) et s'organise en trois sections :
+
+1. **Lieu** : détection automatique (par défaut) ou ville choisie par recherche ;
+2. **Réglages barre** : température et icône des conditions dans la pastille ;
+3. **Réglage panneau** : les relevés du panneau et le nombre de jours de prévisions.
+
+Les valeurs barre/panneau sont écrites dans l'entrée du widget dans
+`~/.config/omarchy/shell.json` :
 
 | Clé | Défaut | Signification |
 | --- | --- | --- |
@@ -108,7 +125,7 @@ choisies dans l'entrée du widget dans `~/.config/omarchy/shell.json` :
 | `showRain` | `true` | probabilité de pluie dans le panneau |
 | `showLocation` | `true` | nom du lieu dans le panneau |
 | `showUpdatedAt` | `true` | heure de mise à jour en pied de panneau |
-| `forecastDays` | `5` | jours de prévisions, 0 à 7 (0 masque la ligne) |
+| `forecastDays` | `5` | jours de prévisions, 0 à 7 (0 masque la ligne) ; réglage panneau |
 | `unit` | `""` | `""` automatique (pays, puis locale), ou `metric` / `imperial` |
 | `refreshMinutes` | `15` | intervalle de rafraîchissement en minutes (minimum 1) |
 

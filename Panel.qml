@@ -150,9 +150,10 @@ Panel {
 
   // When the readings currently on screen were received.
   property var lastUpdated: null
-  readonly property string updatedAtText: lastUpdated
-    ? strings.t("panel.updatedAt").arg(lastUpdated.toLocaleTimeString(Qt.locale(Commons.I18n.formatLocale), Locale.ShortFormat))
-    : ""
+  readonly property string updatedTimeText: lastUpdated
+    ? lastUpdated.toLocaleTimeString(Qt.locale(Commons.I18n.formatLocale), Locale.ShortFormat) : ""
+  readonly property string updatedAtText: updatedTimeText !== ""
+    ? strings.t("panel.updatedAt").arg(updatedTimeText) : ""
 
   Commons.Translations {
     id: strings
@@ -160,6 +161,13 @@ Panel {
   }
 
   onForecastDayCountChanged: Qt.callLater(refreshDailyForecast, null)
+
+  // Gear in the footer and the IPC openSettings both land here.
+  function openSettingsMenu() {
+    if (root.hostWidget && typeof root.hostWidget.openSettings === "function")
+      root.hostWidget.openSettings()
+    else root.close()
+  }
 
   // open-meteo's edge answers 403 to requests whose User-Agent starts with
   // "curl/", which silently left the pill without an icon and so hidden.
@@ -197,19 +205,42 @@ Panel {
     return Commons.I18n.formatNumber(value)
   }
 
-  // Every current reading on one tooltip, for the bar pill's hover. Values the
-  // source does not provide are left out rather than shown blank.
+  // Every current reading on one tooltip, for the bar pill's hover, as an
+  // aligned table. The bar renders tooltip lines centered, so each line is
+  // padded to the same width with non-breaking spaces (the shell measures
+  // with them, plain trailing spaces would be dropped) and the labels are
+  // padded to a common column; the bar font is monospace, so this lines up.
+  function padText(value, length, filler) {
+    var out = String(value)
+    while (out.length < length) out += filler
+    return out
+  }
+
   function tooltipText() {
+    var t = strings.t
+    var rows = []
+    if (reportLocation !== "") rows.push({ label: "", value: reportLocation })
+    if (reportTempNum !== "") rows.push({ label: t("tooltip.temp"), value: reportTempNum + tempUnit })
+    if (reportFeels !== "") rows.push({ label: t("tooltip.feels"), value: reportFeels })
+    if (reportWind !== "") rows.push({ label: t("tooltip.wind"), value: reportWind })
+    if (reportHumidity !== "") rows.push({ label: t("tooltip.humidity"), value: reportHumidity })
+    if (reportRain !== "") rows.push({ label: t("tooltip.rain"), value: reportRain })
+    if (updatedTimeText !== "") rows.push({ label: t("tooltip.updated"), value: updatedTimeText })
+
+    var labelWidth = 0
+    for (var i = 0; i < rows.length; i++)
+      labelWidth = Math.max(labelWidth, rows[i].label.length)
+
     var lines = []
-    if (reportLocation !== "") lines.push(reportLocation)
-    var head = label || ""
-    if (reportTempNum !== "") head += (head !== "" ? " " : "") + reportTempNum + tempUnit
-    if (head !== "") lines.push(head)
-    if (reportFeels !== "") lines.push(strings.t("tooltip.feels").arg(reportFeels))
-    if (reportWind !== "") lines.push(strings.t("tooltip.wind").arg(reportWind))
-    if (reportHumidity !== "") lines.push(strings.t("tooltip.humidity").arg(reportHumidity))
-    if (reportRain !== "") lines.push(strings.t("tooltip.rain").arg(reportRain))
-    if (updatedAtText !== "") lines.push(updatedAtText)
+    var width = 0
+    for (var j = 0; j < rows.length; j++) {
+      var row = rows[j]
+      var line = row.label === "" ? row.value
+        : padText(row.label, labelWidth + 2, " ") + row.value
+      lines.push(line)
+      width = Math.max(width, line.length)
+    }
+    for (var k = 0; k < lines.length; k++) lines[k] = padText(lines[k], width, "\u00a0")
     return lines.join("\n")
   }
 
@@ -613,11 +644,7 @@ Panel {
       if (root.hostWidget && typeof root.hostWidget.toggleSettings === "function")
         root.hostWidget.toggleSettings()
     }
-    function openSettings(): void {
-      if (root.hostWidget && typeof root.hostWidget.openSettings === "function")
-        root.hostWidget.openSettings()
-      else root.close()
-    }
+    function openSettings(): void { root.openSettingsMenu() }
   }
 
   KeyboardPanel {
@@ -1071,11 +1098,12 @@ Panel {
         Text {
           id: footerText
           visible: root.showUpdatedAt && root.updatedAtText !== ""
-          anchors.left: parent.left
+          anchors.right: gearButton.left
+          anchors.rightMargin: Style.space(8)
           anchors.verticalCenter: parent.verticalCenter
           textFormat: Text.PlainText
           text: root.updatedAtText
-          color: Qt.darker(root.bar.foreground, 1.5)
+          color: Qt.darker(root.bar.foreground, 1.9)
           font.family: root.bar.fontFamily
           font.pixelSize: Style.font.caption
           font.letterSpacing: 0.5
@@ -1089,7 +1117,7 @@ Panel {
           tooltipText: strings.t("panel.settings")
           foreground: root.bar.foreground
           fontFamily: root.bar.fontFamily
-          onClicked: root.openSettings()
+          onClicked: root.openSettingsMenu()
         }
       }
     }
